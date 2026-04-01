@@ -350,51 +350,10 @@ const registerUser = async (req, res) => {
 };
 
 // ================= LOGIN =================
-// const loginUser = async (req, res) => {
-//     try {
-//         console.log("LOGIN API HIT"); // ✅ debug
-
-//         const { email, password } = req.body;
-
-//         const user = await User.findOne({ email });
-
-//         if (!user) {
-//             return res.status(404).json({
-//                 message: "User not found"
-//             });
-//         }
-
-//         const isMatch = await bcrypt.compare(password, user.password);
-
-//         if (!isMatch) {
-//             return res.status(401).json({
-//                 message: "Invalid credentials"
-//             });
-//         }
-
-//         const token = jwt.sign(
-//             { id: user._id, role: user.role },
-//             secret,
-//             { expiresIn: "7d" }
-//         );
-
-//         return res.status(200).json({
-//             message: "Login successful",
-//             token,
-//             role: user.role,
-//             user
-//         });
-
-//     } catch (error) {
-//         console.log("LOGIN ERROR:", error);
-//         return res.status(500).json({
-//             message: error.message
-//         });
-//     }
-// };
-
 const loginUser = async (req, res) => {
     try {
+        console.log("LOGIN API HIT"); // ✅ debug
+
         const { email, password } = req.body;
 
         const user = await User.findOne({ email });
@@ -519,48 +478,6 @@ const resetpassword = async (req, res) => {
         });
 
         res.json({ message: "Password updated" });
-
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
-
-const verifyOTP = async (req, res) => {
-    try {
-        const { userId, otp } = req.body;
-
-        const user = await User.findById(userId);
-
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        if (user.otp !== otp) {
-            return res.status(400).json({ message: "Invalid OTP" });
-        }
-
-        if (user.otpExpiry < new Date()) {
-            return res.status(400).json({ message: "OTP expired" });
-        }
-
-        // ✅ Clear OTP
-        user.otp = null;
-        user.otpExpiry = null;
-        await user.save();
-
-        // ✅ Generate token
-        const token = jwt.sign(
-            { id: user._id, role: user.role },
-            secret,
-            { expiresIn: "7d" }
-        );
-
-        return res.status(200).json({
-            message: "Login successful",
-            token,
-            role: user.role,
-            user
-        });
 
     } catch (error) {
         res.status(500).json({ message: error.message });
